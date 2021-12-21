@@ -2,7 +2,9 @@ package main
 
 //TODO
 //
-//change line in exec phase from string to []bool
+// more sys"call"s
+// compile mode
+// make it gc.py compatible (it is, but use include)
 
 import (
 	. "util"
@@ -26,23 +28,23 @@ func main() {
 		compile = (argv[2] == "true" || argv[2] == "1")
 	}
 	var file []string = strings.Split(ReadFile(flname), "\n")
-	var BinFile []string
-	var ret string
+	var BinFile [][]bool
+	var Ret []bool
 	var char string
 	for linei := 0 ; linei < len(file) ; linei++{
-		ret = ""
+		Ret = []bool{}
 		for chari := 0 ; chari < len(file[linei]) ; chari++ {
 			char = string(file[linei][chari])
 			if char == "e" {
-				ret+="0"
+				Ret = append(Ret, false)
 			} else if char == "E" {
-				ret+="1"
+				Ret = append(Ret, true)
 			} else if char == "#" {
 				break
 			}
 		}
-		if (ret != ""){
-			BinFile = append(BinFile, ret)
+		if ( len(Ret) > 0 ){
+			BinFile = append(BinFile, Ret)
 		}
 	}
 	os.Exit(Execute(BinFile))
@@ -50,15 +52,15 @@ func main() {
 }
 
 
-func MakeBin( line string ) int {
+func MakeBin( line []bool ) int {
 	var rt int = 0
 	var ll float64 = float64(len(line)-1)
 	var mul int = int(math.Pow(2, ll))
 	for i := 0 ; i < len(line) ; i++ {
-		if line[i] == byte('1'){
+		if line[i] {
 			rt+=mul
 		}
-		mul = mul/2
+		mul /= 2
 	}
 	return rt
 }
@@ -70,15 +72,15 @@ func pop(stack []int) ([]int, int) {
 	return stackr, ret
 }
 
-func Execute( file []string) int {
-	var line string
+func Execute( file [][]bool) int {
+	var line []bool
 	var stack = []int{}
 	var op string
 	//op = fmt.Sprintf()
 	var new int
 	var mem int
 	var scall int
-	var zero = byte('0')
+	var zero = false
 	for i := 0 ; i < len(file) ; i++{
 		line = file[i]
 		if len(line) != 0 {
@@ -118,12 +120,7 @@ func Execute( file []string) int {
 				}
 
 			} else { // call
-				if line == "1" { // dup
-					stack, mem = pop(stack)
-					stack = append(stack, mem)
-					stack = append(stack, mem)
-					op = fmt.Sprintf("dup %d", mem)
-				} else {
+				if len(line) != 1 {
 					scall = MakeBin(line[1:])
 					switch scall{
 						case 1:
@@ -138,6 +135,11 @@ func Execute( file []string) int {
 								Sout.Flush()
 							}
 					}
+				} else { // dup
+					stack, mem = pop(stack)
+					stack = append(stack, mem)
+					stack = append(stack, mem)
+					op = fmt.Sprintf("dup %d", mem)
 				}
 			}
 			//fmt.Printf("%v\n", op)
