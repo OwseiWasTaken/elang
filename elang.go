@@ -6,11 +6,10 @@ package main
 // compile mode
 // make it gc.py compatible (it is, but use include)
 
+include "gutil"
 import (
-	. "util"
-	"strings"
+	//"strings"
 	"os"
-	"fmt"
 	"math"
 )
 
@@ -27,7 +26,7 @@ func main() {
 		flname = argv[1]
 		compile = (argv[2] == "true" || argv[2] == "1")
 	}
-	var file []string = strings.Split(ReadFile(flname), "\n")
+	var file []string = split(ReadFile(flname), "\n")
 	var BinFile [][]bool
 	var Ret []bool
 	var char string
@@ -48,7 +47,7 @@ func main() {
 		}
 	}
 	os.Exit(Execute(BinFile))
-	fmt.Print(compile)
+	print(compile)
 }
 
 
@@ -76,7 +75,6 @@ func Execute( file [][]bool) int {
 	var line []bool
 	var stack = []int{}
 	var op string
-	//op = fmt.Sprintf()
 	var new int
 	var mem int
 	var scall int
@@ -87,36 +85,36 @@ func Execute( file [][]bool) int {
 			if line[0] == zero { // var stuff
 				if len(line) == 1 { // set var 0
 					stack = append(stack, 0)
-					op = fmt.Sprintf("append 0")
+					op = sprintf("append 0")
 				} else if line[1] == zero { // +, -
 					if line[2] == zero {
 						if line[3] == zero {
 							stack, mem = pop(stack)
 							stack, new = pop(stack)
-							op = fmt.Sprintf("add %d to %d", mem, new)
+							op = sprintf("add %d to %d", mem, new)
 							stack = append(stack, new+mem)
 						} else {
 							stack, mem = pop(stack)
 							stack, new = pop(stack)
-							op = fmt.Sprintf("sub %d to %d", mem, new)
+							op = sprintf("sub %d to %d", mem, new)
 							stack = append(stack, new-mem)
 						}
 					} else { // *, /
 						if line[3] == zero {
 							stack, mem = pop(stack)
 							stack, new = pop(stack)
-							op = fmt.Sprintf("mul %d to %d", mem, new)
+							op = sprintf("mul %d to %d", mem, new)
 							stack = append(stack, new*mem)
 						} else {
 							stack, mem = pop(stack)
 							stack, new = pop(stack)
-							op = fmt.Sprintf("div %d to %d", mem, new)
+							op = sprintf("div %d to %d", mem, new)
 							stack = append(stack, new/mem)
 						}
 					}
 				} else { // set var bin
 					stack = append(stack, MakeBin(line[1:]))
-					op = fmt.Sprintf("append %d", stack[len(stack)-1])
+					op = sprintf("append %d", stack[len(stack)-1])
 				}
 
 			} else { // call
@@ -128,30 +126,21 @@ func Execute( file [][]bool) int {
 							return mem
 						case 3:
 							stack, mem = pop(stack)
-							Sout.Write([]byte{byte(mem)})
-							op = fmt.Sprintf("write %d, \"%s\"", mem, string(byte(mem)))
+							stdout.Write([]byte{byte(mem)})
+							op = sprintf("write %d, \"%s\"", mem, string(byte(mem)))
 							if mem == 10 {
 								op+=" and flush"
-								Sout.Flush()
+								stdout.Flush()
 							}
 					}
 				} else { // dup
 					stack, mem = pop(stack)
 					stack = append(stack, mem)
 					stack = append(stack, mem)
-					op = fmt.Sprintf("dup %d", mem)
+					op = sprintf("dup %d", mem)
 				}
 			}
-			//fmt.Printf("%v\n", op)
 		}
-		/*
-		fmt.Printf("%d: %s\n", i, line)
-		Print(op)
-		op = "UNDEFINED"
-		Print(stack)
-		Print("")
-		//*/
 	}
-	//fmt.Println(stack)
 	return 0
 }
