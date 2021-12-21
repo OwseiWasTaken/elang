@@ -124,7 +124,6 @@ func Execute( file [][]bool) int {
 						case 1:
 							stack, mem = pop(stack)
 							return mem
-							stdout.Flush()
 						case 3:
 							stack, mem = pop(stack)
 							stdout.Write([]byte{byte(mem)})
@@ -142,7 +141,8 @@ func Execute( file [][]bool) int {
 				}
 			}
 		}
+		// print what's happenin'
+		// print(op+"\n")
 	}
-	stdout.Flush()
 	return 0
 }
