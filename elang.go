@@ -1,5 +1,9 @@
 package main
 
+//TODO
+//
+//change line in exec phase from string to []bool
+
 import (
 	. "util"
 	"strings"
